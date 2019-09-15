@@ -2,12 +2,16 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import App from './App'
+import store from '@/store/index'
+import { currency } from '@/currency'
 
 Vue.config.productionTip = false
+Vue.filter('currency', currency)
 
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
+  store: store,
   template: '<App/>',
   components: { App }
 })

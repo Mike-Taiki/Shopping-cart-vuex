@@ -6,7 +6,8 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
     state: { // = data  
-        products: []
+        products: [],
+        cart: []
     },
 
     getters: { // = computed properties
@@ -14,6 +15,19 @@ export default new Vuex.Store({
             return state.products.filter(product => {
                 return product.inventory > 0;
             })
+        },
+        Cart(state) {
+            return state.cart.map(cartItem => {
+                const product = state.products.find(product => product.id === cartItem.id)
+                return {
+                    title: product.title,
+                    price: product.price,
+                    quantity: cartItem.quantity,
+                }
+            })
+        },
+        totalCart(state, getters) {
+            return getters.Cart.reduce((total, product) => total + product.price * product.quantity, 0)
         }
     },
 
@@ -28,12 +42,36 @@ export default new Vuex.Store({
                 })
             })
         },        
+        buyProducts(context, product) {
+            if (product.inventory > 0) {
+                const cartItem = context.state.cart.find(item => item.id === product.id)
+                if (!cartItem) {
+                    context.commit('addItem', product.id)
+                } else {
+                    context.commit('inscreaseQuantity', cartItem)
+                }
+                context.commit('decreaseProductInventory', product)
+            }
+        }
     },
 
     mutations: {
         setProducts(state, products) {
             // update products
             state.products = products
-        }
+        },
+        addItem(state, productId) {
+            state.cart.push({
+                id: productId,
+                quantity: 1
+            })
+        },
+        inscreaseQuantity(state, cartItem) {
+            cartItem.quantity++;
+        },
+        decreaseProductInventory(state, product) {
+            product.inventory--;
+        }        
+
     }
 })
